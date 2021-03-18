@@ -1,33 +1,48 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Date, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+
 from db import Base, engine
 
-# class User(Base):
-#     __tablename__ = 'users'
 
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String())
-#     salary = Column(Integer())
-#     email = Column(String(120), unique=True)
-
-#     def __repr__(self):
-#         return f'User {self.id}, {self.name}'
-
-class Salary(Base):
-    __tablename__ = 'salaries'
-
+class Company(Base):
+    __tablename__ = 'companies'
     id = Column(Integer, primary_key=True)
     name = Column(String)
     city = Column(String)
     address = Column(String)
-    company = Column(String)
-    job = Column(String)
-    phone_number = Column(String)
-    email = Column(String)
-    date_of_birth = Column(Date)
-    salary = Column(Integer)
+    phone = Column(String)
+    employees = relationship('Employee', lazy='joined')
 
     def __repr__(self):
-        return f'Salary {self.id}, {self.name}, {self.company}'
+        return f'Company id: {self.id}, name: {self.name}'
 
+
+class Employee(Base):
+    __tablename__ = 'employees'
+
+    id = Column(Integer, primary_key=True)
+    company_id = Column(Integer, ForeignKey(Company.id), index=True, nullable=False)
+    name = Column(String)
+    job = Column(String)
+    phone = Column(String)
+    email = Column(String)
+    date_of_birth = Column(Date)
+    company = relationship('Company')
+
+    def __repr__(self):
+        return f'Employee id: {self.id}, name: {self.name}'
+
+class Payment(Base):
+    __tablename__ = "payments"
+
+    id = Column(Integer(), primary_key=True)
+    employee_id = Column(Integer, ForeignKey(Employee.id), index=True, nullable=False)
+    payment_date = Column(Date)
+    ammount = Column(Integer)
+
+    def __repr__(self):
+        return f"Payment id: {self.id}, date: {self.payment_date}"
+
+        
 if __name__ == '__main__':
     Base.metadata.create_all(bind=engine)

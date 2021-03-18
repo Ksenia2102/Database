@@ -1,46 +1,43 @@
-from sqlalchemy.sql import func
-from sqlalchemy.sql import desc
+import time
 
-from models import Salary
 from db import db_session
+from models import Company, Employee
 
+def employees_by_company(company_name):
+    company = Company.query.filter(Company.name == company_name).first()
+    employee_list = []
+    if company:
+        for employee in Employee.query.filter(Employee.company_id == company.id):
+            employee_list.append(f'{company.name} - {employee.name}')
+        return employee_list
 
-def top_salary(num_rows):
-    top_salary = Salary.query.order_by(Salary.salary.desc()).limit(num_rows)
-    for s in top_salary:
-        print(s.salary)
+def employees_by_company_joined(company_name):
+    query = db_session.query(Employee, Company).join(
+        Company, Employee.company_id == Company.id
+    ).filter(Company.name == company_name)
+    employee_list =[]
+    for employee, company in query:
+            employee_list.append(f'{company.name} - {employee.name}')
+    return employee_list
 
-def salary_by_city(city_name):
-    top_salary = Salary.query.filter(Salary.city == city_name).order_by(Salary.salary.desc())
-    for s in top_salary:
-        print(f'City: {city_name}, {s.salary}')
-
-def top_salary_by_domain(domain, num_rows):
-    top_salary = Salary.query.filter(Salary.email.like(f'%{domain}')).order_by(Salary.salary.desc()).limit(num_rows)
-    for s in top_salary:
-        print(s.salary)
-
-def average_salary():
-    avg_salary = db_session.query(func.avg(Salary.salary)).scalar()
-    print(f'{avg_salary:.2f}')
-
-def count_unique_cities():
-    count_cities = db_session.query(Salary.city).group_by(Salary.city).count()
-    print(count_cities)
-
-def top_avg_salary_by_city(num_rows):
-    top_salary = db_session.query(
-        Salary.city,
-        func.avg(Salary.salary).label('avg_salary')
-    ).group_by(Salary.city).order_by(desc('avg_salary')).limit(num_rows)
-
-    for city, salary in top_salary:
-        print(f'{city}, {salary:.2f}')
+def employees_by_company_relation(company_name):
+    company = Company.query.filter(Company.name == company_name).first()
+    employee_list = []
+    if company:
+        for employee in company.employees:
+            employee_list.append(f'{company.name} - {employee.name}')
+        return employee_list
 
 if __name__ == '__main__':
-    # top_salary(10)
-    # salary_by_city('Ижевск')
-    # top_salary_by_domain('@yandex.ru', 5)
-    # average_salary()
-    # count_unique_cities()
-    top_avg_salary_by_city(5)
+    start = time.perf_counter()
+    # for _ in range(100):
+    #     employees_by_company('Мосметрострой')
+    # print(time.perf_counter() - start)
+
+    # for _ in range(100):
+    #     employees_by_company_joined('Мосметрострой')
+    # print(time.perf_counter() - start)
+
+    for _ in range(100):
+        employees_by_company_relation('Мосметрострой')
+    print(time.perf_counter() - start)
