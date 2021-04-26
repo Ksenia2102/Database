@@ -58,6 +58,7 @@ def fake_projects_for_employee(company_id, employee_id):
         projects.append(project)
     return projects
 
+
 def generate_data(data, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         writer = csv.writer(f, delimiter=';')

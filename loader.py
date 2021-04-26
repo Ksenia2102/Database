@@ -1,5 +1,6 @@
 import csv
 from datetime import datetime
+
 from sqlalchemy.ext import SQLAlchemyError
 
 from db import db_session
@@ -17,6 +18,7 @@ def read_csv(filename):
                 print_error(row_num, 'Неправильный формат данных: {}', e)
             except SQLAlchemyError as e:
                 print_error(row_num, 'Нарушена целостность данных: {}', e)
+
 
 def print_error(row_num, error_text, exception):
     print(f"Ошибка на строке {row_num}")
